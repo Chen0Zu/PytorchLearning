@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import scipy.io as scio
 import pdb
 
-BATCH_SIZE = 5
+BATCH_SIZE = 64
 
 data = scio.loadmat('house.mat')
 
@@ -38,10 +38,11 @@ class LinearRegression(nn.Module):
 
 model = LinearRegression()
 criterion = nn.MSELoss()
-optimizer = optim.SGD(model.parameters(), lr=1e-10)
+optimizer = optim.Adam(model.parameters(), lr=0.01, betas=(0.9, 0.99))
 
+l_his = []
 
-for epoch in range(100):
+for epoch in range(10):
 	for i, (batch_x, batch_y) in enumerate(loader):
 		inputs = Variable(batch_x)
 		labels = Variable(batch_y)
@@ -50,9 +51,13 @@ for epoch in range(100):
 		y_pred = model(inputs)
 		loss = criterion(y_pred,labels)
 		print(epoch, i, loss.data[0])
-
+		l_his.append(loss.data[0])
 		optimizer.zero_grad()
 		loss.backward()
 		optimizer.step()
 
+plt.figure()
+plt.plot(l_his)
+plt.show()
+print l_his
 		# print('Epoch: ', epoch, '| Step: ', i, ' | batch y: ', batch_y.numpy())

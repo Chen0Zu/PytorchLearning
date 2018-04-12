@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import scipy.io as scio
 import pdb
 
-BATCH_SIZE = 64
+BATCH_SIZE = 32
 
 data = scio.loadmat('house.mat')
 
@@ -19,6 +19,8 @@ testY = data['testY']
 
 x = torch.from_numpy(X).float()
 y = torch.from_numpy(Y).float()
+testX = Variable(torch.from_numpy(testX).float())
+testY = torch.from_numpy(testY).float()
 
 torch_dataset = Data.TensorDataset(data_tensor=x,target_tensor=y)
 
@@ -42,7 +44,7 @@ optimizer = optim.Adam(model.parameters(), lr=0.01, betas=(0.9, 0.99))
 
 l_his = []
 
-for epoch in range(10):
+for epoch in range(100):
 	for i, (batch_x, batch_y) in enumerate(loader):
 		inputs = Variable(batch_x)
 		labels = Variable(batch_y)
@@ -56,8 +58,16 @@ for epoch in range(10):
 		loss.backward()
 		optimizer.step()
 
-plt.figure()
-plt.plot(l_his)
-plt.show()
-print l_his
+# plt.figure()
+# plt.plot(l_his)
+# plt.show()
+
+y_pred_train = model(Variable(x))
+y1 = y_pred_train.data
+train_rms = np.sqrt((y1-y).pow(2).mean())
+y_pred_test = model(testX)
+y1 = y_pred_test.data
+test_rms = np.sqrt((y1-testY).pow(2).mean())
+
+print(train_rms, test_rms)
 		# print('Epoch: ', epoch, '| Step: ', i, ' | batch y: ', batch_y.numpy())
